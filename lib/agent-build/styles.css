@@ -1,0 +1,513 @@
+/* ──────────────────────────────────────────────────────────────────────────
+ * Agent build overlay. Everything here is pointer-events:none except the HUD.
+ * Motion is transform/opacity only.
+ * ────────────────────────────────────────────────────────────────────────── */
+
+.ab-doc {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 60;
+}
+.ab-fixed {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 61;
+}
+.ab-fixed-art {
+  inset: 0;
+}
+.ab-doc > *,
+.ab-fixed > *,
+.ab-fixed-art > * {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+.ab-out {
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+/* ───────── Agents ───────── */
+.ab-agent {
+  width: 0;
+  height: 0;
+  will-change: transform;
+}
+.ab-agent svg {
+  position: absolute;
+  transition:
+    opacity 0.35s ease,
+    transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.55));
+}
+.ab-cross {
+  left: -9px;
+  top: -9px;
+}
+.ab-arrow {
+  left: -3px;
+  top: -2px;
+}
+.ab-ibeam {
+  left: -7px;
+  top: -11px;
+}
+.ab-agent-tag {
+  position: absolute;
+  left: 14px;
+  top: 17px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 4px;
+  font: 600 10px/16px var(--font-jetbrains), ui-monospace, monospace;
+  color: #fff;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+  transition:
+    opacity 0.3s ease,
+    transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.ab-agent[data-look="cross"] .ab-arrow,
+.ab-agent[data-look="cross"] .ab-ibeam,
+.ab-agent[data-look="cross"] .ab-agent-tag {
+  opacity: 0;
+  transform: scale(0.3) rotate(-30deg);
+}
+.ab-agent[data-look="arrow"] .ab-cross,
+.ab-agent[data-look="arrow"] .ab-ibeam,
+.ab-agent[data-look="ibeam"] .ab-cross,
+.ab-agent[data-look="ibeam"] .ab-arrow {
+  opacity: 0;
+  transform: scale(0.4) rotate(45deg);
+}
+.ab-agent[data-look="ibeam"] .ab-agent-tag {
+  transform: translate(-6px, 2px);
+}
+/* Swarm: arrows rotate (around their tip) to point at the ring's centre. */
+.ab-agent[data-aim][data-look="arrow"] .ab-arrow {
+  transform: rotate(var(--rot, 0deg));
+  transform-origin: 3px 2px;
+  transition: opacity 0.35s ease;
+}
+
+/* ───────── Selection box ───────── */
+.ab-sel {
+  border: 1px solid var(--sel);
+  opacity: 0;
+  transition: opacity 0.16s ease;
+}
+.ab-sel.ab-on {
+  opacity: 1;
+}
+.ab-sel.ab-off {
+  opacity: 0;
+  transition-duration: 0.2s;
+}
+.ab-h {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  background: #fff;
+  border: 1px solid var(--sel);
+}
+.ab-tl {
+  left: -4px;
+  top: -4px;
+}
+.ab-tr {
+  right: -4px;
+  top: -4px;
+}
+.ab-bl {
+  left: -4px;
+  bottom: -4px;
+}
+.ab-br {
+  right: -4px;
+  bottom: -4px;
+}
+.ab-size {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 7px);
+  transform: translateX(-50%);
+  padding: 2px 6px;
+  border-radius: 3px;
+  background: var(--sel);
+  color: #fff;
+  font: 500 10px/14px var(--font-jetbrains), ui-monospace, monospace;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+
+/* ───────── Typing caret ───────── */
+.ab-caret {
+  width: 2px;
+  animation: ab-blink 0.9s steps(1) infinite;
+}
+@keyframes ab-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* ───────── Border draw ───────── */
+.ab-border i {
+  position: absolute;
+  background: var(--c);
+  box-shadow: 0 0 8px var(--c);
+}
+.ab-border .t {
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 1px;
+  transform-origin: left;
+  transform: scaleX(0);
+}
+.ab-border .r {
+  right: 0;
+  top: 0;
+  width: 1px;
+  height: 100%;
+  transform-origin: top;
+  transform: scaleY(0);
+}
+.ab-border .b {
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 1px;
+  transform-origin: right;
+  transform: scaleX(0);
+}
+.ab-border .l {
+  left: 0;
+  top: 0;
+  width: 1px;
+  height: 100%;
+  transform-origin: bottom;
+  transform: scaleY(0);
+}
+.ab-border {
+  transition: opacity 0.3s ease;
+}
+.ab-border.ab-off {
+  opacity: 0;
+}
+
+/* ───────── Wipe line ───────── */
+.ab-wipe {
+  box-shadow: 0 0 14px 1px currentColor;
+  opacity: 0.9;
+}
+
+/* ───────── Tag duplication ghost ───────── */
+.ab-ghost {
+  border: 1px dashed var(--c);
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--c) 12%, transparent);
+}
+.ab-count {
+  position: absolute;
+  right: -9px;
+  top: -10px;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: #ef4444;
+  color: #fff;
+  font: 600 10px/17px var(--font-jetbrains), ui-monospace, monospace;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+/* ───────── Scan logo ───────── */
+.ab-fixed > .ab-logo {
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: grid;
+  place-items: center;
+  transition:
+    opacity 0.5s ease,
+    transform 0.6s ease;
+}
+.ab-logo svg {
+  animation: ab-breathe 1.8s ease-in-out infinite;
+}
+.ab-logo-ring {
+  position: absolute;
+  inset: -14px;
+  border: 1px solid color-mix(in oklab, var(--accent) 60%, transparent);
+  border-radius: 8px;
+  animation: ab-ring 1.8s ease-out infinite;
+}
+.ab-logo.ab-off {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.85);
+}
+@keyframes ab-breathe {
+  50% {
+    transform: scale(0.94);
+  }
+}
+@keyframes ab-ring {
+  from {
+    opacity: 0.8;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.5);
+  }
+}
+
+/* ───────── HUD ───────── */
+.ab-fixed > .ab-hud {
+  top: auto;
+  left: 50%;
+  bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 46px;
+  padding: 0 5px 0 14px;
+  border: 1px solid #26262b;
+  border-radius: 999px;
+  background: rgba(10, 10, 11, 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow:
+    0 20px 50px -18px rgba(0, 0, 0, 0.9),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  color: #d4d4d8;
+  font: 500 11px/1 var(--font-jetbrains), ui-monospace, monospace;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  pointer-events: auto;
+  transform: translate(-50%, 24px);
+  opacity: 0;
+  transition:
+    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.35s ease;
+}
+.ab-fixed > .ab-hud.ab-on {
+  transform: translate(-50%, 0);
+  opacity: 1;
+}
+.ab-panel {
+  display: none;
+  align-items: center;
+  gap: 10px;
+}
+.ab-hud[data-phase="scan"] .ab-scan,
+.ab-hud[data-phase="build"] .ab-build,
+.ab-hud[data-phase="done"] .ab-done {
+  display: flex;
+}
+.ab-hud[data-phase="done"] .ab-x {
+  display: none;
+}
+.ab-hud b {
+  color: #fff;
+  font-weight: 600;
+}
+.ab-hud em {
+  font-style: normal;
+  color: #71717a;
+}
+
+/* scan */
+.ab-pulse {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--accent);
+  animation: ab-blink 1s steps(1) infinite;
+}
+.ab-scan-text {
+  color: #e4e4e7;
+}
+.ab-scanbar,
+.ab-bar {
+  position: relative;
+  display: block;
+  height: 2px;
+  background: #27272a;
+  overflow: hidden;
+  border-radius: 2px;
+}
+.ab-scanbar {
+  width: 120px;
+  margin-right: 6px;
+}
+.ab-bar {
+  width: 100%;
+  margin-top: 5px;
+}
+.ab-scanbar i,
+.ab-bar i {
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  transform-origin: left;
+  transform: scaleX(0);
+  transition: transform 0.25s ease;
+}
+.ab-scanbar i {
+  transition: none;
+}
+
+/* build */
+.ab-avatars {
+  display: flex;
+  padding-left: 6px;
+}
+.ab-avatars i {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  margin-left: -6px;
+  border-radius: 999px;
+  border: 2px solid #0a0a0b;
+  color: #fff;
+  font: 600 9px/1 var(--font-jetbrains), ui-monospace, monospace;
+  font-style: normal;
+}
+.ab-agents {
+  color: #a1a1aa;
+}
+.ab-div {
+  width: 1px;
+  height: 18px;
+  background: #27272a;
+  margin: 0 4px;
+}
+.ab-layers {
+  display: flex;
+  flex-direction: column;
+  min-width: 118px;
+  color: #a1a1aa;
+}
+.ab-layers-n {
+  font-variant-numeric: tabular-nums;
+}
+.ab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 11px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #a1a1aa;
+  font: inherit;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+.ab-btn:hover {
+  background: #18181b;
+  color: #fff;
+}
+.ab-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.ab-btn.ab-active {
+  color: #fff;
+  border-color: #2e2e33;
+  background: #151517;
+}
+.ab-tour.ab-active svg {
+  color: #22c55e;
+}
+.ab-sound .ab-wave {
+  opacity: 0.35;
+}
+.ab-sound.ab-active .ab-wave {
+  opacity: 1;
+}
+.ab-speed {
+  min-width: 42px;
+  justify-content: center;
+  color: #fff;
+  border-color: #2e2e33;
+}
+.ab-x {
+  width: 34px;
+  padding: 0;
+  justify-content: center;
+  font-size: 13px;
+  color: #71717a;
+}
+
+/* done */
+.ab-done-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: #22c55e;
+  box-shadow: 0 0 10px #22c55e;
+}
+.ab-done-text {
+  color: #f4f4f5;
+  margin-right: 6px;
+}
+.ab-live {
+  background: var(--accent);
+  color: #fff;
+}
+.ab-live:hover {
+  background: color-mix(in oklab, var(--accent) 85%, #fff);
+}
+.ab-replay {
+  border-color: #2e2e33;
+}
+
+/* Smaller HUD on phones */
+@media (max-width: 640px) {
+  .ab-fixed > .ab-hud {
+    bottom: 12px;
+    height: 42px;
+    gap: 2px;
+    padding: 0 4px 0 10px;
+    font-size: 10px;
+    max-width: calc(100vw - 16px);
+  }
+  .ab-avatars,
+  .ab-div,
+  .ab-tour span,
+  .ab-sound span,
+  .ab-layers em {
+    display: none;
+  }
+  .ab-layers {
+    min-width: 70px;
+    margin: 0 4px;
+  }
+  .ab-btn {
+    height: 32px;
+    padding: 0 8px;
+  }
+  .ab-speed {
+    min-width: 34px;
+  }
+  .ab-scanbar {
+    width: 70px;
+  }
+}

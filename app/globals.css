@@ -1,0 +1,242 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens — "Noir Op-Art / System Console".
+ * --accent is injected on <html> from data/content.ts (site.accent), so the colour
+ * has a single source of truth. The fallback below only applies if that's missing.
+ */
+:root {
+  --accent: #e11d48;
+  --ink: #060606;
+  --ink-2: #0a0a0b;
+  --panel: #0f0f10;
+  --panel-2: #131315;
+  --line: #1f1f22;
+  --line-2: #2a2a2e;
+  --fg: #f4f4f5;
+  --fg-2: #a1a1aa;
+  --fg-3: #8d8d96;
+  /* Accent tuned for small text on dark panels (WCAG AA). Large display text uses --accent. */
+  --accent-ink: color-mix(in oklab, var(--accent) 78%, #fff);
+  --ok: #22c55e;
+  --nav-h: 76px;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-panel: var(--panel);
+  --color-panel-2: var(--panel-2);
+  --color-line: var(--line);
+  --color-line-2: var(--line-2);
+  --color-fg: var(--fg);
+  --color-fg-2: var(--fg-2);
+  --color-fg-3: var(--fg-3);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-ok: var(--ok);
+
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-hand: var(--font-caveat), "Segoe Script", cursive;
+}
+
+html {
+  background: var(--ink);
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--ink);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  overflow-x: clip;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--accent) 70%, transparent);
+  color: #fff;
+}
+
+section[id] {
+  scroll-margin-top: calc(var(--nav-h) + 12px);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * Agent build — pre-paint hiding.
+ * An inline script in <head> sets html[data-ab] before first paint on a first visit.
+ * Every [data-layer] stays in the DOM (SEO + screen readers) and keeps its layout box;
+ * only its opacity is zero until an agent reveals it.
+ * ────────────────────────────────────────────────────────────────────────── */
+html[data-ab] [data-layer]:not([data-ab-shown]) {
+  opacity: 0;
+}
+html[data-ab] body {
+  /* Avoid accidental text selection flashes while things type in. */
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ──────────────────────────────── Components ──────────────────────────────── */
+
+@layer components {
+  /* Small uppercase mono label: `// 01.00 SEC_ABOUT`, `#SYS-01`, ... */
+  .mono-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 1.4;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--fg-3);
+  }
+
+  /* Dark console panel with 1px border and accent hover glow. */
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    transition:
+      border-color 0.3s ease,
+      box-shadow 0.3s ease,
+      background-color 0.3s ease;
+  }
+  .panel-hover:hover,
+  .panel-hover:focus-within {
+    border-color: color-mix(in oklab, var(--accent) 65%, var(--line));
+    box-shadow:
+      0 0 0 1px color-mix(in oklab, var(--accent) 22%, transparent),
+      0 18px 60px -24px color-mix(in oklab, var(--accent) 55%, transparent);
+  }
+
+  /* Mono tech tag pill. */
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 26px;
+    padding: 0 10px;
+    border: 1px solid var(--line-2);
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: var(--fg-2);
+    background: color-mix(in oklab, var(--panel) 80%, transparent);
+    white-space: nowrap;
+  }
+
+  /* Buttons. */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    height: 48px;
+    padding: 0 22px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    border-radius: 3px;
+    transition:
+      background-color 0.25s ease,
+      border-color 0.25s ease,
+      color 0.25s ease,
+      box-shadow 0.25s ease;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    border: 1px solid var(--accent);
+  }
+  .btn-primary:hover {
+    box-shadow: 0 10px 40px -10px color-mix(in oklab, var(--accent) 80%, transparent);
+    background: color-mix(in oklab, var(--accent) 88%, #fff);
+  }
+  .btn-ghost {
+    background: transparent;
+    color: var(--fg);
+    border: 1px solid var(--line-2);
+  }
+  .btn-ghost:hover {
+    border-color: color-mix(in oklab, var(--accent) 70%, var(--line-2));
+    color: #fff;
+  }
+
+  /* Huge outlined display word. */
+  .outline-word {
+    color: transparent;
+    -webkit-text-stroke: 1px color-mix(in oklab, var(--accent) 42%, transparent);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 0.8;
+    white-space: nowrap;
+    user-select: none;
+  }
+
+  .status-dot {
+    position: relative;
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background: var(--ok);
+    box-shadow: 0 0 10px color-mix(in oklab, var(--ok) 70%, transparent);
+  }
+  .status-dot::after {
+    content: "";
+    position: absolute;
+    inset: -3px;
+    border-radius: inherit;
+    border: 1px solid var(--ok);
+    opacity: 0;
+    animation: dot-ping 2.4s ease-out infinite;
+  }
+}
+
+@keyframes dot-ping {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+
+/* Toast */
+@keyframes toast-in {
+  from {
+    transform: translateY(12px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
