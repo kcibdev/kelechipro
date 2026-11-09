@@ -34,7 +34,7 @@ export default function AgentBuildRoot() {
 
     const onReplay = () => {
       load()
-        .then((m) => m.runAgentBuild())
+        .then((m) => m.runAgentBuild({ replay: true }))
         .catch(() => html.removeAttribute("data-ab"));
     };
     window.addEventListener(REPLAY_EVENT, onReplay);

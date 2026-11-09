@@ -99,17 +99,12 @@
 }
 
 /* ───────── Selection box ───────── */
+/* Like a real design tool: selections appear and disappear instantly (no half-transparent states). */
 .ab-sel {
   border: 1px solid var(--sel);
-  opacity: 0;
-  transition: opacity 0.16s ease;
-}
-.ab-sel.ab-on {
-  opacity: 1;
 }
 .ab-sel.ab-off {
-  opacity: 0;
-  transition-duration: 0.2s;
+  visibility: hidden;
 }
 .ab-h {
   position: absolute;
@@ -141,7 +136,8 @@
   transform: translateX(-50%);
   padding: 2px 6px;
   border-radius: 3px;
-  background: var(--sel);
+  /* Deeper than the outline blue so white text passes WCAG AA (≈5.8:1). */
+  background: #1a5fd0;
   color: #fff;
   font: 500 10px/14px var(--font-jetbrains), ui-monospace, monospace;
   white-space: nowrap;
@@ -231,75 +227,32 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
 }
 
-/* ───────── Scan logo ───────── */
-.ab-fixed > .ab-logo {
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  display: grid;
-  place-items: center;
-  transition:
-    opacity 0.5s ease,
-    transform 0.6s ease;
-}
-.ab-logo svg {
-  animation: ab-breathe 1.8s ease-in-out infinite;
-}
-.ab-logo-ring {
-  position: absolute;
-  inset: -14px;
-  border: 1px solid color-mix(in oklab, var(--accent) 60%, transparent);
-  border-radius: 8px;
-  animation: ab-ring 1.8s ease-out infinite;
-}
-.ab-logo.ab-off {
-  opacity: 0;
-  transform: translate(-50%, -50%) scale(0.85);
-}
-@keyframes ab-breathe {
-  50% {
-    transform: scale(0.94);
-  }
-}
-@keyframes ab-ring {
-  from {
-    opacity: 0.8;
-    transform: scale(0.8);
-  }
-  to {
-    opacity: 0;
-    transform: scale(1.5);
-  }
-}
-
 /* ───────── HUD ───────── */
 .ab-fixed > .ab-hud {
   top: auto;
   left: 50%;
-  bottom: 18px;
+  bottom: 16px;
   display: flex;
   align-items: center;
-  gap: 4px;
-  height: 46px;
-  padding: 0 5px 0 14px;
+  gap: 2px;
+  height: 40px;
+  padding: 0 4px 0 14px;
   border: 1px solid #26262b;
   border-radius: 999px;
   background: rgba(10, 10, 11, 0.88);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  box-shadow:
-    0 20px 50px -18px rgba(0, 0, 0, 0.9),
-    inset 0 1px 0 rgba(255, 255, 255, 0.04);
-  color: #d4d4d8;
+  box-shadow: 0 16px 40px -18px rgba(0, 0, 0, 0.9);
+  color: #a1a1aa;
   font: 500 11px/1 var(--font-jetbrains), ui-monospace, monospace;
   letter-spacing: 0.02em;
   white-space: nowrap;
   pointer-events: auto;
-  transform: translate(-50%, 24px);
+  transform: translate(-50%, 16px);
   opacity: 0;
   transition:
-    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 0.35s ease;
+    transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.3s ease;
 }
 .ab-fixed > .ab-hud.ab-on {
   transform: translate(-50%, 0);
@@ -309,106 +262,61 @@
   display: none;
   align-items: center;
   gap: 10px;
+  margin-right: 6px;
 }
 .ab-hud[data-phase="scan"] .ab-scan,
 .ab-hud[data-phase="build"] .ab-build,
 .ab-hud[data-phase="done"] .ab-done {
   display: flex;
 }
-.ab-hud[data-phase="done"] .ab-x {
+.ab-hud[data-phase="done"] .ab-sound {
   display: none;
 }
 .ab-hud b {
   color: #fff;
   font-weight: 600;
 }
-.ab-hud em {
-  font-style: normal;
-  color: #71717a;
+.ab-text {
+  color: #d4d4d8;
 }
-
-/* scan */
 .ab-pulse {
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
   border-radius: 999px;
   background: var(--accent);
   animation: ab-blink 1s steps(1) infinite;
 }
-.ab-scan-text {
-  color: #e4e4e7;
+.ab-layers {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 64px;
+  font-variant-numeric: tabular-nums;
 }
-.ab-scanbar,
 .ab-bar {
   position: relative;
   display: block;
+  width: 100%;
   height: 2px;
   background: #27272a;
   overflow: hidden;
   border-radius: 2px;
 }
-.ab-scanbar {
-  width: 120px;
-  margin-right: 6px;
-}
-.ab-bar {
-  width: 100%;
-  margin-top: 5px;
-}
-.ab-scanbar i,
 .ab-bar i {
   position: absolute;
   inset: 0;
   background: var(--accent);
   transform-origin: left;
   transform: scaleX(0);
-  transition: transform 0.25s ease;
-}
-.ab-scanbar i {
-  transition: none;
-}
-
-/* build */
-.ab-avatars {
-  display: flex;
-  padding-left: 6px;
-}
-.ab-avatars i {
-  display: grid;
-  place-items: center;
-  width: 20px;
-  height: 20px;
-  margin-left: -6px;
-  border-radius: 999px;
-  border: 2px solid #0a0a0b;
-  color: #fff;
-  font: 600 9px/1 var(--font-jetbrains), ui-monospace, monospace;
-  font-style: normal;
-}
-.ab-agents {
-  color: #a1a1aa;
-}
-.ab-div {
-  width: 1px;
-  height: 18px;
-  background: #27272a;
-  margin: 0 4px;
-}
-.ab-layers {
-  display: flex;
-  flex-direction: column;
-  min-width: 118px;
-  color: #a1a1aa;
-}
-.ab-layers-n {
-  font-variant-numeric: tabular-nums;
+  transition: transform 0.2s ease;
 }
 .ab-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  height: 34px;
-  padding: 0 11px;
+  height: 30px;
+  padding: 0 12px;
   border-radius: 999px;
   border: 1px solid transparent;
   background: transparent;
@@ -417,8 +325,7 @@
   cursor: pointer;
   transition:
     background-color 0.2s ease,
-    color 0.2s ease,
-    border-color 0.2s ease;
+    color 0.2s ease;
 }
 .ab-btn:hover {
   background: #18181b;
@@ -428,86 +335,52 @@
   outline: 2px solid var(--accent);
   outline-offset: 1px;
 }
-.ab-btn.ab-active {
-  color: #fff;
-  border-color: #2e2e33;
-  background: #151517;
-}
-.ab-tour.ab-active svg {
-  color: #22c55e;
+.ab-icon {
+  width: 30px;
+  padding: 0;
 }
 .ab-sound .ab-wave {
   opacity: 0.35;
 }
+.ab-sound.ab-active {
+  color: #fff;
+}
 .ab-sound.ab-active .ab-wave {
   opacity: 1;
 }
-.ab-speed {
-  min-width: 42px;
-  justify-content: center;
-  color: #fff;
+.ab-skip {
   border-color: #2e2e33;
+  color: #e4e4e7;
 }
-.ab-x {
-  width: 34px;
-  padding: 0;
-  justify-content: center;
-  font-size: 13px;
-  color: #71717a;
-}
-
-/* done */
 .ab-done-dot {
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
   border-radius: 999px;
   background: #22c55e;
-  box-shadow: 0 0 10px #22c55e;
-}
-.ab-done-text {
-  color: #f4f4f5;
-  margin-right: 6px;
-}
-.ab-live {
-  background: var(--accent);
-  color: #fff;
-}
-.ab-live:hover {
-  background: color-mix(in oklab, var(--accent) 85%, #fff);
+  box-shadow: 0 0 8px #22c55e;
 }
 .ab-replay {
-  border-color: #2e2e33;
+  color: #e4e4e7;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: #3f3f46;
 }
 
-/* Smaller HUD on phones */
+/* Agents leaving after the build */
+.ab-agent.ab-gone > * {
+  opacity: 0 !important;
+  transition: opacity 0.4s ease;
+}
+
 @media (max-width: 640px) {
   .ab-fixed > .ab-hud {
     bottom: 12px;
-    height: 42px;
-    gap: 2px;
-    padding: 0 4px 0 10px;
+    height: 38px;
+    padding: 0 3px 0 12px;
     font-size: 10px;
     max-width: calc(100vw - 16px);
   }
-  .ab-avatars,
-  .ab-div,
-  .ab-tour span,
-  .ab-sound span,
-  .ab-layers em {
-    display: none;
-  }
   .ab-layers {
-    min-width: 70px;
-    margin: 0 4px;
-  }
-  .ab-btn {
-    height: 32px;
-    padding: 0 8px;
-  }
-  .ab-speed {
-    min-width: 34px;
-  }
-  .ab-scanbar {
-    width: 70px;
+    min-width: 48px;
   }
 }

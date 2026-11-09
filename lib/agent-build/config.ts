@@ -1,18 +1,14 @@
 /**
- * Tunables for the agent build. Durations are seconds at 1× speed.
- * The whole sequence is tuned to land around 40–50s at 1× on desktop.
+ * Tunables for the agent build.
+ *
+ * Design goals (from visitor / recruiter feedback):
+ *  - content first: only the on-screen part of the hero builds, everything else is visible at first paint;
+ *  - fast: the hero finishes in ~3s, then the agents leave;
+ *  - calm: a handful of agents in a restrained palette, no auto-scroll, nothing that blocks reading.
  */
 
-export const AGENT_COLORS = [
-  "#ef4444", // red
-  "#f97316", // orange
-  "#eab308", // yellow
-  "#22c55e", // green
-  "#06b6d4", // cyan
-  "#3b82f6", // blue
-  "#a855f7", // purple
-  "#ec4899", // pink
-] as const;
+/** Lead agent uses the site accent; the rest are neutral greys. */
+export const AGENT_COLORS = ["var(--accent)", "#f4f4f5", "#a1a1aa", "#d4d4d8", "#e4e4e7", "#8d8d96"] as const;
 
 export const AGENT_LETTERS = "KAIRONVESTMLDBQZUFJHPCWGXY";
 
@@ -20,93 +16,72 @@ export const AGENT_LETTERS = "KAIRONVESTMLDBQZUFJHPCWGXY";
 export const SELECTION_BLUE = "#2f80ff";
 
 export interface DeviceProfile {
-  startAgents: number;
-  maxAgents: number;
-  /** Seconds between new agents joining. */
-  joinEvery: number;
-  defaultSpeed: 1 | 2 | 4;
-  /** Auto-scroll smoothing rate (per second). Lower = calmer scroll. */
-  tourEase: number;
-  /** Hard cap on auto-scroll speed, px per second (at 1×). */
-  tourMaxSpeed: number;
+  /** Agents working on the hero. */
+  agents: number;
   /** Multiplier on cursor glide durations. >1 = slower, calmer cursors. */
   travelScale: number;
 }
 
-export const DESKTOP: DeviceProfile = {
-  startAgents: 18,
-  maxAgents: 30,
-  joinEvery: 1.0,
-  defaultSpeed: 1,
-  tourEase: 2.4,
-  tourMaxSpeed: 1400,
-  travelScale: 1,
-};
+export const DESKTOP: DeviceProfile = { agents: 8, travelScale: 1 };
+/** Tablets (touch, or 768–1023px). */
+export const TABLET: DeviceProfile = { agents: 6, travelScale: 1.15 };
+/** Phones (< 768px). */
+export const MOBILE: DeviceProfile = { agents: 4, travelScale: 1.25 };
 
-/** Tablets (touch, 768–1279px): fewer agents and gentler motion than desktop. */
-export const TABLET: DeviceProfile = {
-  startAgents: 12,
-  maxAgents: 18,
-  joinEvery: 1.8,
-  defaultSpeed: 1,
-  tourEase: 1.3,
-  tourMaxSpeed: 420,
-  travelScale: 1.5,
-};
+/**
+ * What the agents do once the hero is built:
+ *  - "leave": fade out and hand over to the section inspector (calm, recommended);
+ *  - "swarm": stay and orbit the pointer until the visitor closes the HUD.
+ */
+export const AFTER_BUILD: "leave" | "swarm" = "leave";
 
-/** Phones (< 768px): small screen, so slow everything down to stay readable. */
-export const MOBILE: DeviceProfile = {
-  startAgents: 8,
-  maxAgents: 10,
-  joinEvery: 3,
-  defaultSpeed: 1,
-  tourEase: 1.1,
-  tourMaxSpeed: 300,
-  travelScale: 1.7,
-};
+/** How long the "Built in Xs" HUD stays up before it hides itself (ms). */
+export const DONE_HUD_MS = 3200;
 
-export const SPEEDS = [1, 2, 4] as const;
-export type Speed = (typeof SPEEDS)[number];
+/** Section headings the inspector briefly selects as they scroll into view. */
+export const INSPECT_SELECTOR = "main section[id]:not(#top) h2";
 
+/** Durations in seconds. Tuned so the hero completes in roughly 3s on desktop. */
 export const TIMING = {
-  /** Phase 1: minimum time on the scan screen (real seconds, not speed-scaled). */
-  scanMin: 2.6,
+  /** Wait for fonts before measuring, but never longer than this (s). */
+  fontWaitMax: 0.6,
+  /** Minimum time the crosshairs show before turning into cursors. */
+  scanMin: 0.15,
   /** Crosshair → cursor morph before agents start working. */
-  morph: 0.7,
+  morph: 0.15,
 
   /** Travel: base + distance / pxPerSecond, clamped. */
-  travelBase: 0.42,
-  travelPxPerSec: 1500,
-  travelMax: 1.15,
+  travelBase: 0.18,
+  travelPxPerSec: 2600,
+  travelMax: 0.45,
 
-  selectIn: 0.18,
+  selectIn: 0.06,
   /** Pause with the finished element still selected. */
-  holdAfter: 0.22,
+  holdAfter: 0.1,
   /** Agent rest between layers. */
-  rest: 0.12,
+  rest: 0.04,
 
   /** Text typing */
-  perChar: 0.024,
-  textMin: 0.4,
-  textMax: 2.4,
+  perChar: 0.011,
+  textMin: 0.25,
+  textMax: 0.9,
   /** Display words (huge type) type slower per letter. */
-  perCharDisplay: 0.11,
+  perCharDisplay: 0.06,
 
-  cardBorder: 0.75,
-  cardFill: 0.35,
-  buttonBorder: 0.42,
-  buttonFill: 0.3,
-  imageWipe: 1.1,
-  blockWipe: 0.7,
-  lineDraw: 0.7,
-  fade: 0.6,
-  statCount: 1.1,
-  tagPop: 0.3,
-  tagDuplicate: 0.2,
+  cardBorder: 0.4,
+  cardFill: 0.2,
+  buttonBorder: 0.26,
+  buttonFill: 0.15,
+  imageWipe: 0.6,
+  blockWipe: 0.35,
+  lineDraw: 0.35,
+  fade: 0.35,
+  /** Decorative layers (kind "fade") fade in by themselves over this long. */
+  decorFade: 1.2,
+  statCount: 0.7,
+  tagPop: 0.15,
+  tagDuplicate: 0.07,
+
+  /** Section inspector: how long the heading stays selected. */
+  inspectHold: 0.7,
 } as const;
-
-/** Viewport fraction (from the tour position) in which layers may be built while touring. */
-export const TOUR_WINDOW = 1.5;
-/** Where the frontier sits in the viewport while touring (fraction from the top). */
-export const TOUR_ANCHOR = 0.16;
-/* Auto-scroll smoothing and max speed are per device: see DeviceProfile.tourEase / tourMaxSpeed. */

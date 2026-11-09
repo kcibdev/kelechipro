@@ -37,6 +37,7 @@ export function collectLayers(root: ParentNode = document): Layer[] {
       kind,
       parent: null,
       fixed: isInsideFixed(el),
+      priority: Number(el.dataset.priority ?? 0) || 0,
       box: { x: 0, y: 0, w: 0, h: 0 },
       state: "pending",
     };

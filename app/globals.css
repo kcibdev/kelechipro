@@ -89,10 +89,11 @@ section[id] {
 /* ──────────────────────────────────────────────────────────────────────────
  * Agent build — pre-paint hiding.
  * An inline script in <head> sets html[data-ab] before first paint on a first visit.
- * Every [data-layer] stays in the DOM (SEO + screen readers) and keeps its layout box;
- * only its opacity is zero until an agent reveals it.
+ * Only the hero (#top) builds; its [data-layer] elements stay in the DOM (SEO + screen
+ * readers) and keep their layout box, with opacity zero until an agent reveals them.
+ * Everything below the hero is visible from the first paint.
  * ────────────────────────────────────────────────────────────────────────── */
-html[data-ab] [data-layer]:not([data-ab-shown]) {
+html[data-ab] #top [data-layer]:not([data-ab-shown]) {
   opacity: 0;
 }
 html[data-ab] body {

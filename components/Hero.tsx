@@ -97,7 +97,7 @@ export default function Hero() {
       />
       {/* Huge outlined word, spanning the full width */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-[calc(var(--nav-h)+28px)] -z-10 flex justify-center overflow-hidden">
-        <span data-layer="text" className="outline-word text-[clamp(5rem,19.5vw,22rem)]">
+        <span data-layer="fade" className="outline-word text-[clamp(5rem,19.5vw,22rem)]">
           {hero.outlineWord}
         </span>
       </div>
@@ -130,30 +130,31 @@ export default function Hero() {
               <span className="inline-flex items-end gap-1" aria-hidden="true">
                 <span
                   data-layer="block"
+                  data-priority="3"
                   className="inline-block bg-accent px-[0.14em] pt-[0.08em] pb-[0.02em] text-[clamp(3.25rem,10vw,8rem)] leading-[0.9] font-extrabold tracking-[-0.045em] text-white uppercase"
                 >
                   {profile.shortName}
                 </span>
-                <span data-layer="text" className="text-[clamp(3.25rem,10vw,8rem)] leading-[0.9] font-extrabold text-accent">
+                <span data-layer="text" data-priority="3" className="text-[clamp(3.25rem,10vw,8rem)] leading-[0.9] font-extrabold text-accent">
                   .
                 </span>
               </span>
             </h1>
-            <p data-layer="text" className="mb-6 font-mono text-[12px] tracking-[0.18em] text-fg uppercase">
+            <p data-layer="text" data-priority="2" className="mb-6 font-mono text-[12px] tracking-[0.18em] text-fg uppercase">
               <span className="mr-2 text-accent-ink" aria-hidden="true">
                 ●
               </span>
               {hero.subtitle}
             </p>
-            <p data-layer="text" className="mb-9 max-w-[580px] text-[16px] leading-[1.75] text-fg-2 md:text-[17px]">
+            <p data-layer="text" data-priority="2" className="mb-9 max-w-[580px] text-[16px] leading-[1.75] text-fg-2 md:text-[17px]">
               <Rich text={hero.intro} />
             </p>
             <div className="mb-12 flex flex-wrap gap-3">
-              <a data-layer="button" href={hero.primaryCta.href} className="btn btn-primary">
+              <a data-layer="button" data-priority="1" href={hero.primaryCta.href} className="btn btn-primary">
                 {hero.primaryCta.label}
                 <ArrowIcon />
               </a>
-              <a data-layer="button" href={hero.secondaryCta.href} className="btn btn-ghost">
+              <a data-layer="button" data-priority="1" href={hero.secondaryCta.href} className="btn btn-ghost">
                 {hero.secondaryCta.label}
               </a>
               <a
@@ -185,12 +186,8 @@ export default function Hero() {
                     <span className="text-accent-ink">{f.n}</span>
                     <span aria-hidden="true">/03</span>
                   </p>
-                  <p data-layer="text" className="mb-1 text-[15px] font-bold tracking-[-0.01em]">
-                    {f.title}
-                  </p>
-                  <p data-layer="text" className="text-[13px] leading-snug text-fg-2">
-                    {f.body}
-                  </p>
+                  <p className="mb-1 text-[15px] font-bold tracking-[-0.01em]">{f.title}</p>
+                  <p className="text-[13px] leading-snug text-fg-2">{f.body}</p>
                 </li>
               ))}
             </ol>

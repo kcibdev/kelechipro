@@ -3,7 +3,7 @@
 Personal portfolio of **Isaac Kelechi Bright**: a full-stack web and mobile engineer.
 It's built with Next.js (App Router), TypeScript, Tailwind CSS v4 and GSAP.
 
-On a visitor's first visit each session, a team of AI "agents" builds the page in front of them. They select each element, type the text, draw the borders, wipe in the images, duplicate the tags and count up the stats. When they finish, they gather into a swarm that follows the visitor's pointer.
+On a visitor's first visit each session, a small team of AI "agents" builds the hero in about four seconds. They select each element, type the text, draw the borders, wipe in the portrait and count up the stats. Everything below the hero is readable from the first paint, and the page never scrolls by itself. Afterwards, a single agent briefly selects each section heading as it scrolls into view.
 
 ---
 
@@ -73,12 +73,13 @@ data/content.ts         ← all editable content
 lib/agent-build/        the "agents build the page" module
   boot.ts               inline <head> script: decides whether to hide layers before paint
   layers.ts             layer collection + measurement in reading order
-  controller.ts         phases, scheduling, Touring auto-scroll, speed, skip/replay
+  controller.ts         hero build: scan → build → done, priorities, skip/replay
+  inspect.ts            after the build: one agent selects each section heading once
   agents.ts             agent cursors + curved, eased motion
   overlay.ts            selection boxes, carets, border draws, duplicate ghosts
   reveal.ts             per-type reveal effects (text / card / image / tags / stat / …)
   hud.ts                bottom control bar
-  swarm.ts              finished-state swarm: agents orbit the pointer in counter-rotating rings
+  swarm.ts              optional pointer-orbit swarm (set AFTER_BUILD = "swarm" in config.ts)
   sound.ts              Web Audio ticks, pops and chime (opt-in, no audio files)
   clock.ts              speed-scaled GSAP tweens and waits
   styles.css            overlay + HUD styles
@@ -86,12 +87,14 @@ lib/agent-build/        the "agents build the page" module
 
 ### How the build animation works
 
-1. **Before first paint**, `boot.ts` sets `html[data-ab]` when this is the first visit of the session. This only happens when the visitor doesn't prefer reduced motion and isn't a crawler, and the URL doesn't say `?build=off`. CSS then sets every `[data-layer]` element to `opacity: 0`. The content stays in the HTML for search engines and screen readers, and the layout never shifts.
-2. **Scan.** Crosshairs drift around while fonts load and `layers.ts` measures every layer once.
-3. **Build.** The controller hands layers to free agents in reading order. A child layer starts only after its parent card is finished. Each agent glides along a curved path, draws a selection box and runs the reveal that matches the layer's type. Touring auto-scrolls the page to follow the build, and any manual scroll turns Touring off.
-4. **Done.** The HUD shows the agent count and build time. The agents form two counter-rotating rings around the pointer, with every cursor pointing at the centre.
+The animation is tuned for people skimming many portfolios: content first, fast, and never in the way.
 
-It animates only `transform`, `opacity` and `clip-path`, all in a single `gsap.ticker` loop with no layout reads inside it. Overlays are `pointer-events: none`. **✕** and **Esc** always jump to the finished page. If the JavaScript fails to load within 6 seconds, the boot script un-hides the page by itself.
+1. **Before first paint**, `boot.ts` sets `html[data-ab]` on the first visit of a session. This only happens when the visitor doesn't prefer reduced motion and isn't a crawler, and the URL doesn't say `?build=off`. CSS hides only the **hero's** `[data-layer]` elements (with `opacity: 0`); the nav and every other section are visible immediately. If the JavaScript hasn't loaded within 3 seconds, the hero is shown anyway.
+2. **Build (about 4s).** 4–8 agents (by screen size) build the part of the hero that's on screen. Your name, title, intro and buttons get `data-priority` and go first; decoration (the glow and the outline word) simply fades in. Anything in the hero that's off-screen at load is revealed instantly.
+3. **Done.** The agents leave and the small HUD shows "Built in Xs · Replay", then hides itself. **Skip** and **Esc** finish instantly.
+4. **Inspector.** As each section heading scrolls into view, one cursor selects it for under a second, then leaves. It never hides or delays content.
+
+Tunables live in `lib/agent-build/config.ts`: agent counts per device, `TIMING`, `AFTER_BUILD` and `INSPECT_SELECTOR`.
 
 **Making new elements part of the build:** add `data-layer="text|card|button|image|tags|stat|block|line|fade"` to an element. Inside a `tags` row, mark each pill with `data-tag`. Inside a `stat`, mark the number with `data-count={n}`.
 
@@ -153,12 +156,11 @@ DNS changes usually take effect within minutes, but can take up to 48 hours.
 
 ## Performance notes
 
-Lighthouse results for the finished page (`/?build=off`), from a local production build:
+Lighthouse on a local production build, **with the first-visit animation running**:
 
 | Profile | Performance | Accessibility | Best practices | SEO |
 | ------- | ----------- | ------------- | -------------- | --- |
-| Mobile  | 95          | 100           | 100            | 100 |
+| Mobile  | 90          | 100           | 100            | 100 |
 | Desktop | 100         | 100           | 100            | 100 |
 
-**Trade-off to know about:** on a visitor's *first* visit, page content is hidden until the agents reveal it. That's what the design asks for. Lighthouse simulates a first-time visitor, so on `/` with the animation on it can't find a Largest Contentful Paint and reports no performance score. Real first-time visitors also see the hero text arrive a few seconds later than they would without the build. Repeat visits in the same session, reduced-motion users, crawlers and `?build=off` all get the finished page right away. If first-visit Core Web Vitals matter more to you than the full effect, make the hero `h1` and intro paragraph visible from the start by removing their `data-layer` attributes in `components/Hero.tsx`.
-# kelechipro
+Content below the hero is visible at first paint, real content is on screen within about 0.3s, and layout shift is 0.

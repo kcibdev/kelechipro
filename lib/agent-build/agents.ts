@@ -52,7 +52,10 @@ export class Agent {
   wanderX = 0;
   wanderY = 0;
 
-  constructor(parent: HTMLElement, color: string, letter: string, x: number, y: number) {
+  /**
+   * @param ink label text colour — white on the accent lead, near-black on the light neutrals.
+   */
+  constructor(parent: HTMLElement, color: string, letter: string, x: number, y: number, ink = "#fff") {
     this.color = color;
     this.letter = letter;
     this.x = x;
@@ -61,7 +64,7 @@ export class Agent {
     this.el.className = "ab-agent";
     this.el.style.color = color;
     this.el.dataset.look = "cross";
-    this.el.innerHTML = `${CROSS}${ARROW}${IBEAM}<span class="ab-agent-tag" style="background:${color}">${letter}</span>`;
+    this.el.innerHTML = `${CROSS}${ARROW}${IBEAM}<span class="ab-agent-tag" style="background:${color};color:${ink}">${letter}</span>`;
     parent.appendChild(this.el);
     this.render();
   }
@@ -132,6 +135,12 @@ export class Agent {
   setPos(x: number, y: number) {
     this.x = x;
     this.y = y;
+  }
+
+  /** Fade out (CSS), then remove. */
+  leave() {
+    this.el.classList.add("ab-gone");
+    window.setTimeout(() => this.el.remove(), 450);
   }
 
   destroy() {
