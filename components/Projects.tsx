@@ -1,32 +1,13 @@
 import type { Project } from "@/data/content";
 import { projects } from "@/data/content";
-import { ArrowIcon, SectionHeader, StatusChip, TagRow } from "./primitives";
-
-function ProjectLink({ link }: { link?: Project["link"] }) {
-  if (!link) return null;
-  return (
-    <a
-      data-layer="text"
-      href={link.href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="inline-flex items-center gap-2 font-mono text-[11px] tracking-[0.14em] text-fg uppercase hover:text-accent-ink"
-    >
-      {link.label}
-      <ArrowIcon />
-    </a>
-  );
-}
+import { SectionHeader, StatusChip, TagRow } from "./primitives";
+import { AppIcon, BrowserFrame, Metric, PhoneStrip, StoreBadges } from "./ProjectMedia";
 
 function Bullets({ items, size = "sm" }: { items: string[]; size?: "sm" | "md" }) {
   return (
     <ul className="space-y-2.5">
       {items.map((d) => (
-        <li
-          key={d}
-          data-layer="text"
-          className={`flex gap-3 leading-relaxed text-fg-2 ${size === "md" ? "text-[14.5px]" : "text-[13px]"}`}
-        >
+        <li key={d} className={`flex gap-3 leading-relaxed text-fg-2 ${size === "md" ? "text-[14.5px]" : "text-[13px]"}`}>
           <span aria-hidden="true" className="mt-[0.62em] h-1 w-1 shrink-0 bg-accent" />
           <span>{d}</span>
         </li>
@@ -36,26 +17,42 @@ function Bullets({ items, size = "sm" }: { items: string[]; size?: "sm" | "md" }
 }
 
 function FeaturedCard({ p }: { p: Project }) {
+  const site = p.links?.find((l) => l.kind === "web");
   return (
-    <article data-layer="card" className="panel panel-hover relative mb-5 grid overflow-hidden md:grid-cols-12">
+    <article className="panel panel-hover relative mb-5 grid overflow-hidden md:grid-cols-12">
       <div className="flex flex-col p-7 md:col-span-7 md:p-10">
         <div className="mb-10 flex items-center justify-between gap-4">
           <p className="mono-label text-accent-ink">{p.label}</p>
           <p className="mono-label">#FLAG-01</p>
         </div>
-        <h3 data-layer="text" className="mb-4 text-[clamp(2.5rem,6vw,4.75rem)] leading-[0.9] font-extrabold tracking-[-0.045em]">
-          {p.title}
-          <span className="text-accent">.</span>
-        </h3>
-        <p data-layer="text" className="mb-8 max-w-[520px] text-[16px] leading-[1.7] text-fg-2">
-          {p.summary}
-        </p>
-        <div className="mt-auto flex flex-wrap items-center gap-5">
+        <div className="mb-4 flex items-center gap-4">
+          {p.media?.icon ? <AppIcon src={p.media.icon} alt={`${p.title} logo`} size={56} /> : null}
+          <h3 className="text-[clamp(2.5rem,6vw,4.75rem)] leading-[0.9] font-extrabold tracking-[-0.045em]">
+            {p.title}
+            <span className="text-accent">.</span>
+          </h3>
+        </div>
+        <p className="mb-6 max-w-[520px] text-[16px] leading-[1.7] text-fg-2">{p.summary}</p>
+        {p.metric ? (
+          <div className="mb-8">
+            <Metric value={p.metric.value} label={p.metric.label} />
+          </div>
+        ) : null}
+        <div className="mt-auto grid gap-5">
           <TagRow tags={p.tags} />
-          <ProjectLink link={p.link} />
+          {p.links ? <StoreBadges links={p.links} title={p.title} /> : null}
         </div>
       </div>
       <div className="border-t border-line bg-[#0b0b0c] p-7 md:col-span-5 md:border-t-0 md:border-l md:p-10">
+        {p.media?.site ? (
+          <div className="mb-8">
+            <BrowserFrame
+              src={p.media.site}
+              alt={`${p.title} website homepage`}
+              url={site ? site.href.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "") : p.title}
+            />
+          </div>
+        ) : null}
         <p className="mono-label mb-6">SPEC // CORE MODULES</p>
         <Bullets items={p.details} size="md" />
       </div>
@@ -65,33 +62,36 @@ function FeaturedCard({ p }: { p: Project }) {
 
 function ProjectCard({ p, n }: { p: Project; n: number }) {
   return (
-    <article data-layer="card" className="panel panel-hover flex flex-col p-6 md:p-7">
-      <div className="mb-8 flex items-center justify-between gap-3">
+    <article className="panel panel-hover flex flex-col p-6 md:p-7">
+      <div className="mb-6 flex items-center justify-between gap-3">
         <p className="mono-label text-accent-ink">{p.label}</p>
         <p className="mono-label">#FLAG-{String(n).padStart(2, "0")}</p>
       </div>
-      <h3 data-layer="text" className="mb-3 text-[26px] leading-none font-extrabold tracking-[-0.03em]">
-        {p.title}
-      </h3>
-      <p data-layer="text" className="mb-6 text-[14px] leading-relaxed text-fg-2">
-        {p.summary}
-      </p>
+      <div className="mb-3 flex items-center gap-3">
+        {p.media?.icon ? <AppIcon src={p.media.icon} alt={`${p.title} app icon`} size={40} /> : null}
+        <h3 className="text-[26px] leading-none font-extrabold tracking-[-0.03em]">{p.title}</h3>
+      </div>
+      <p className="mb-5 text-[14px] leading-relaxed text-fg-2">{p.summary}</p>
+      {p.metric ? (
+        <div className="mb-5">
+          <Metric value={p.metric.value} label={p.metric.label} />
+        </div>
+      ) : null}
+      {p.media?.shots?.length ? (
+        <div className="mb-6">
+          <PhoneStrip shots={p.media.shots} title={p.title} />
+        </div>
+      ) : null}
       <div className="mb-7">
         <Bullets items={p.details} />
       </div>
-      <div className="mt-auto flex flex-wrap items-end justify-between gap-4">
-        <TagRow tags={p.tags} />
-        {p.status ? (
-          <span data-layer="text">
-            <StatusChip>{p.status}</StatusChip>
-          </span>
-        ) : null}
-      </div>
-      {p.link ? (
-        <div className="mt-5">
-          <ProjectLink link={p.link} />
+      <div className="mt-auto grid gap-4">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <TagRow tags={p.tags} />
+          {p.status ? <StatusChip>{p.status}</StatusChip> : null}
         </div>
-      ) : null}
+        {p.links ? <StoreBadges links={p.links} title={p.title} /> : null}
+      </div>
     </article>
   );
 }

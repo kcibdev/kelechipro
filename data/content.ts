@@ -26,10 +26,28 @@ export interface Project {
   tags: string[];
   /** Optional status chip, e.g. "In development". Only state what is true. */
   status?: string;
-  /** Optional link (live site, store listing, repo, case study). */
-  link?: { href: string; label: string };
+  /** Store listings / live site. Rendered as small badges. */
+  links?: ProjectLink[];
+  /** Icon, phone screenshots (portrait) or a website screenshot (landscape), all in /public. */
+  media?: ProjectMedia;
+  /** One headline number, taken from a public source (store page) or your resume. */
+  metric?: { value: string; label: string };
   /** Which Systems Matrix filters this project appears under. */
   categories: Category[];
+}
+
+export interface ProjectLink {
+  href: string;
+  label: string;
+  kind: "play" | "appstore" | "web";
+}
+
+export interface ProjectMedia {
+  icon?: string;
+  /** Portrait phone screenshots, shown as a strip (2–3 work best). */
+  shots?: string[];
+  /** Landscape website screenshot, shown in a browser frame. */
+  site?: string;
 }
 
 export interface Stat {
@@ -124,8 +142,8 @@ export const profile = {
   location: "Aba, Abia State, Nigeria",
   locationShort: "Aba, NG",
   email: "kcib.mail@gmail.com",
-  /** Transparent cutout in /public (cropped from your photo, background removed). */
-  portrait: "/portrait.png" as string | null,
+  /** Transparent cutout in /public. When you swap the photo, use a new filename so caches update. */
+  portrait: "/portrait-v2.png" as string | null,
   portraitAlt: "Portrait of Isaac Kelechi Bright",
   /** From your resume: "8+ years of experience". */
   yearsOfExperience: 8 as number | null,
@@ -175,7 +193,8 @@ export const hero = {
   stats: [
     { label: "Years building", value: profile.yearsOfExperience, suffix: "+" },
     { label: "Active users", value: 70000, suffix: "+", note: "Across Apps" },
-    { label: "Platforms", value: 3, note: "iOS · Android · Web" },
+    // Sum of Google Play lower bounds: 100K+ Abapower, 10K+ EasyPay, 5K+ Agent, 1K+ SWF, 50+, 50+, 1+.
+    { label: "Play downloads", value: 116, suffix: "K+", note: "Across shipped apps" },
   ] satisfies Stat[] as Stat[],
   portraitStatus: "● ONLINE · ABA, NG",
   focus: [
@@ -410,6 +429,9 @@ const velcro: Project = {
   ],
   tags: ["PHP", "Next.js", "WhatsApp Cloud API", "Ollama"],
   categories: ["fintech", "web"],
+  links: [{ kind: "web", label: "usevelcro.com", href: "https://www.usevelcro.com/" }],
+  media: { icon: "/projects/velcro-icon.png", site: "/projects/velcro-site.jpg" },
+  metric: { value: "1000+", label: "active users" },
 };
 
 const abapower: Project = {
@@ -424,6 +446,15 @@ const abapower: Project = {
   ],
   tags: ["Flutter", "REST API", "FCM/APNs"],
   categories: ["mobile", "fintech"],
+  links: [
+    { kind: "play", label: "Google Play", href: "https://play.google.com/store/apps/details?id=com.aple.customer" },
+    { kind: "appstore", label: "App Store", href: "https://apps.apple.com/ng/app/abapower-nkeanyi/id6795852912" },
+  ],
+  media: {
+    icon: "/projects/abapower-icon.png",
+    shots: ["/projects/abapower-1.jpg", "/projects/abapower-2.jpg", "/projects/abapower-3.jpg"],
+  },
+  metric: { value: "100K+", label: "Google Play downloads" },
 };
 
 const geometric: Project = {
@@ -437,6 +468,15 @@ const geometric: Project = {
   ],
   tags: ["Flutter", "Maps", "Push"],
   categories: ["mobile"],
+  links: [
+    { kind: "play", label: "Google Play", href: "https://play.google.com/store/apps/details?id=com.aple.swf" },
+    { kind: "appstore", label: "App Store", href: "https://apps.apple.com/ng/app/gp-smart-workforce/id6815572564" },
+  ],
+  media: {
+    icon: "/projects/geometric-icon.png",
+    shots: ["/projects/geometric-1.jpg", "/projects/geometric-2.jpg", "/projects/geometric-3.jpg"],
+  },
+  metric: { value: "1K+", label: "Google Play downloads" },
 };
 
 const easypay: Project = {
@@ -451,6 +491,17 @@ const easypay: Project = {
   tags: ["Flutter", "REST API", "Wallets"],
   status: "Shipped",
   categories: ["fintech", "mobile"],
+  links: [
+    { kind: "play", label: "Google Play", href: "https://play.google.com/store/apps/details?id=com.easypay.customer" },
+    { kind: "appstore", label: "App Store", href: "https://apps.apple.com/ng/app/easy-pay-one-customer/id6769742408" },
+    { kind: "play", label: "Agent app", href: "https://play.google.com/store/apps/details?id=com.easypay.agent" },
+  ],
+  media: {
+    icon: "/projects/easypay-icon.png",
+    shots: ["/projects/easypay-1.jpg", "/projects/easypay-2.jpg", "/projects/easypay-3.jpg"],
+  },
+  // 10K+ (customer) + 5K+ (agent) on Google Play — a lower bound.
+  metric: { value: "15K+", label: "Play downloads · both apps" },
 };
 
 const mamihubs: Project = {
@@ -461,6 +512,14 @@ const mamihubs: Project = {
   details: [],
   tags: ["Flutter", "API", "E-commerce"],
   categories: ["mobile"],
+  links: [
+    { kind: "play", label: "Google Play", href: "https://play.google.com/store/apps/details?id=com.mamihubs.mamihub" },
+    { kind: "appstore", label: "App Store", href: "https://apps.apple.com/ng/app/mamihub/id6790533318" },
+  ],
+  media: {
+    icon: "/projects/mamihubs-icon.png",
+    shots: ["/projects/mamihubs-1.jpg", "/projects/mamihubs-2.jpg", "/projects/mamihubs-3.jpg"],
+  },
 };
 
 export const projects = {
@@ -523,6 +582,13 @@ export const systems = {
       details: [],
       tags: ["Web3", "Solidity", "Flutter"],
       categories: ["fintech", "web"],
+      links: [
+        { kind: "play", label: "Google Play", href: "https://play.google.com/store/apps/details?id=com.candlewebservices.candleweb" },
+      ],
+      media: {
+        icon: "/projects/candleweb-icon.png",
+        shots: ["/projects/candleweb-1.jpg", "/projects/candleweb-2.jpg", "/projects/candleweb-3.jpg"],
+      },
     },
     {
       slug: "corpsplug",
@@ -542,6 +608,11 @@ export const systems = {
       details: [],
       tags: ["Flutter", "sqflite", "fl_chart"],
       categories: ["mobile"],
+      links: [{ kind: "play", label: "Google Play", href: "https://play.google.com/store/apps/details?id=com.kcib.dayflow" }],
+      media: {
+        icon: "/projects/dayflow-icon.png",
+        shots: ["/projects/dayflow-1.jpg", "/projects/dayflow-2.jpg", "/projects/dayflow-3.jpg"],
+      },
     },
     {
       slug: "infinizoom",

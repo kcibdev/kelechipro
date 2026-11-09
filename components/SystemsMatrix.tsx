@@ -4,6 +4,7 @@ import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import type { Category } from "@/data/content";
 import { systems } from "@/data/content";
 import { SectionHeader, StatusChip } from "./primitives";
+import { AppIcon, StoreBadges } from "./ProjectMedia";
 
 type FilterId = "all" | Category;
 
@@ -128,9 +129,17 @@ export default function SystemsMatrix() {
                       {flagship ? " · FLAGSHIP" : ""}
                     </span>
                   </div>
-                  <h3 data-layer="text" className="mb-2.5 text-[19px] leading-tight font-bold tracking-[-0.02em]">
-                    {p.title}
-                  </h3>
+                  <div className="mb-2.5 flex items-center gap-3">
+                    {p.media?.icon ? <AppIcon src={p.media.icon} alt={`${p.title} icon`} size={32} /> : null}
+                    <h3 data-layer="text" className="text-[19px] leading-tight font-bold tracking-[-0.02em]">
+                      {p.title}
+                    </h3>
+                  </div>
+                  {p.metric ? (
+                    <p className="mb-2 font-mono text-[11px] text-fg-2">
+                      <b className="font-semibold text-fg">{p.metric.value}</b> {p.metric.label}
+                    </p>
+                  ) : null}
                   <p data-layer="text" className="mb-6 text-[13.5px] leading-relaxed text-fg-2">
                     {p.summary}
                   </p>
@@ -144,6 +153,11 @@ export default function SystemsMatrix() {
                     </ul>
                     {p.status ? <StatusChip>{p.status}</StatusChip> : null}
                   </div>
+                  {p.links ? (
+                    <div className="mt-4 border-t border-line pt-4">
+                      <StoreBadges links={p.links} title={p.title} />
+                    </div>
+                  ) : null}
                 </article>
               </li>
             );
